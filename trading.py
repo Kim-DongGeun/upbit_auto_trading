@@ -42,15 +42,15 @@ while True:
 
     # 매수 시도
     if op_mode is True and hold is False and price is not None and price <= target:
-        krw_blance = upbit.get_blance("KRW")
-        upbit.buy_market_order(targetTicker, krw_blance * 0.95)
+        krw_balance = upbit.get_balance("KRW")
+        upbit.buy_market_order(targetTicker, krw_balance * 0.95)
         hold = True
         print("매수 : ",now, price) 
 
     # 장마감시 매도
     if now.hour == 8 and now.minute == 59 and (50 <= now.second <= 59):
         if op_mode is True and hold is True:
-            btc_balance = upbit.get_blance(targetTicker)
+            btc_balance = upbit.get_balance(targetTicker)
             res = upbit.sell_market_order(targetTicker, btc_balance)
             hold = False
             print("매도 : ", now, res['price'])
