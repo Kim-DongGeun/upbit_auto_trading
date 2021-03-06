@@ -4,6 +4,8 @@ import datetime
 
 K = 0.5
 targetTicker = "KRW-BTC"
+op_mode = False # 목표가 갱신 여부
+hold = False # 코인 보유 여부
 
 def cal_target(ticker):
     df = pyupbit.get_ohlcv(ticker, 'day')
@@ -11,7 +13,8 @@ def cal_target(ticker):
     today = df.iloc[-1]
     yesterdayRange = yesterday['high'] - yesterday['low']
     target = today['open'] + yesterdayRange * K
-    print("시가 : ", today['open'])
+    if op_mode is False:
+        print("시가 : ", today['open'])
     return target
 
 f = open("upbit.txt")
@@ -22,9 +25,6 @@ f.close()
 upbit = pyupbit.Upbit(access, secret) # 객체 생성
 
 target = cal_target(targetTicker) # 목표가
-op_mode = False # 목표가 갱신 여부
-hold = False # 코인 보유 여부
-buy_price = 0
 
 print("목표가 : ", datetime.datetime.now(), target)
 
@@ -34,14 +34,15 @@ while True:
     # 목표가 갱신
     if now.hour == 9 and now.minute == 0 and 20 <= now.second <= 30:
         target = cal_target(targetTicker)
+        if op_mode is False:
+            print("목표가 : ", now, target)
         op_mode = True
-        print("목표가 : ", now, target)
-
+        
 
     price = pyupbit.get_current_price(targetTicker)
 
     # 매수 시도
-    if op_mode is True and hold is False and price is not None and price <= target:
+    if op_mode is True and hold is False and price is not None and price >= target:
         krw_balance = upbit.get_balance("KRW")
         upbit.buy_market_order(targetTicker, krw_balance * 0.95)
         hold = True
